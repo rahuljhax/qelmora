@@ -2,7 +2,7 @@
 Project Management Platform
 
 ## Frontend
-React
+Next js
 
 ## Backend
 Node.js + Express
