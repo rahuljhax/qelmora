@@ -1,8 +1,35 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export const SignupForm = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${apiUrl}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name, email, password
+        })
+      })
+      const data = await res.json();
+      if (!data.ok) {
+        throw new Error(data.message)
+      }
+      console.log(data.message);
+    } catch (err) {
+      alert(err.message)
+    }
+  }
   return (
-    <form className="w-full space-y-4">
+    <form onSubmit={handleSignup} className="w-full space-y-4">
       <div className="flex flex-col gap-1.5 text-left">
         <label htmlFor="name" className="text-sm font-medium text-slate-700">
           Full Name
@@ -10,6 +37,8 @@ export const SignupForm = () => {
         <input
           id="name"
           type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
           className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all placeholder:text-slate-400"
           placeholder="John Doe"
         />
@@ -22,6 +51,8 @@ export const SignupForm = () => {
         <input
           id="email"
           type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
           className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all placeholder:text-slate-400"
           placeholder="name@example.com"
         />
@@ -34,6 +65,8 @@ export const SignupForm = () => {
         <input
           id="password"
           type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
           className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all placeholder:text-slate-400"
           placeholder="••••••••"
         />
@@ -46,13 +79,15 @@ export const SignupForm = () => {
         <input
           id="confirmPassword"
           type="password"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
           className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all placeholder:text-slate-400"
           placeholder="••••••••"
         />
       </div>
 
       <button
-        type="button"
+        type="submit"
         className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-colors cursor-pointer"
       >
         Create Account
