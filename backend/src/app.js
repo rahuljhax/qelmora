@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
 // Initialize the app 
 const app = express();
@@ -11,7 +10,6 @@ app.use(cors({
 
 // To parse request data into json format
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 
 
