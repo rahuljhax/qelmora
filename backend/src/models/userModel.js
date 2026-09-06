@@ -13,6 +13,20 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Password is required']
+    },
+    role: {
+        type: String,
+        enum: ['admin', 'manager', 'member'],
+        required: [true, 'Role is required'],
+        lowercase: true
+    },
+    organization: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: [true, 'Organization is required']
+    },
+    refreshToken: {
+        type: String
     }
 }, { timestamps: true });
 
