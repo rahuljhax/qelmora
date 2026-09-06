@@ -29,6 +29,17 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
         required: [true, 'Project id is required']
+    },
+    createdBy: {
+        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'CreatedBy id is required']
+    },
+    organization: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: [true, 'Organization id is required']
     }
 }, { timestamps: true })
 

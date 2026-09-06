@@ -1,17 +1,21 @@
 const User = require('../models/userModel');
-const bcrypt = require('bcryptjs');
-const generateToken = require('../utils/generateToken');
+const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
+const jwt = require('jsonwebtoken');
+const Invitation = require('../models/invitationModel');
+const Organization = require('../models/organizationModel');
+
 const signup = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role, organization } = req.body;
 
         // Validate Data 
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !role || !organization) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all fields: name, email, password'
+                message: 'Please provide all fields: name, email, password, role, organization'
             })
         }
+
         const existingUser = await User.findOne({ email: email });
         if (existingUser) {
             return res.status(400).json({
@@ -20,24 +24,40 @@ const signup = async (req, res) => {
             })
         }
 
+        // Create Organization 
+        const newOrg = await Organization.create({
+            name: organization
+        })
+
         // Create new user in the database 
         const newUser = await User.create({
-            name, email, password
+            name, email, password, role, organization: newOrg._id
         });
 
         // Generating the token 
-        const token = generateToken(newUser._id);
+        const accessToken = generateAccessToken(newUser._id);
+        const refreshToken = generateRefreshToken(newUser._id);
+
+        newUser.refreshToken = refreshToken;
+        await newUser.save();
+
+        // Setting the refresh token in the cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
 
         // Send Successfull Message after creating the user
         res.status(201).json({
             success: true,
             message: 'User Registered Successfully!',
-            token,
+            accessToken,
             user: {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
-                password: newUser.password
+                role: newUser.role,
+                organization: newUser.organization,
             }
         })
     } catch (err) {
@@ -77,11 +97,23 @@ const login = async (req, res) => {
                 message: 'Invalid Credentials'
             })
         }
-        const token = generateToken(user._id);
+        // Generating the token
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        // Setting the refresh token in the cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
         res.status(200).json({
             success: true,
             message: 'User Logged in Successfully',
-            token,
+            accessToken,
             data: {
                 id: user._id,
                 name: user.name,
@@ -97,6 +129,105 @@ const login = async (req, res) => {
         })
     }
 }
+
+const acceptInvite = async (req, res) => {
+    try {
+        const { token, name, password } = req.body;
+        const existingInvitation = await Invitation.findOne({ token: token });
+        if (!existingInvitation) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid token'
+            })
+        }
+        if (existingInvitation.status === 'accepted') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invitation already used'
+            })
+        }
+        if (Date.now() > existingInvitation.expiresAt) {
+            existingInvitation.status = 'expired';
+            await existingInvitation.save();
+            return res.status(400).json({
+                success: false,
+                message: 'Expired token'
+            })
+        }
+        const newUser = await User.create({
+            name,
+            email: existingInvitation.email,
+            password,
+            organization: existingInvitation.organization,
+            role: existingInvitation.role
+        })
+
+        existingInvitation.status = 'accepted';
+        await existingInvitation.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'User onboarded successfully, Please login now',
+        })
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+const refreshToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                message: 'Refresh token required'
+            })
+        }
+        const { userId } = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const user = await User.findById(userId);
+
+        if (!user || refreshToken !== user.refreshToken) {
+            return res.status(403).json({
+                success: false,
+                message: 'Invalid or revoked refresh token'
+            })
+        }
+        const newAccessToken = generateAccessToken(user._id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Refresh token sent successfully!',
+            accessToken: newAccessToken
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: err.message
+        })
+    }
+}
+
+const logout = async (req, res) => {
+    try {
+        res.clearCookie('refreshToken');
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: err.message
+        })
+    }
+}
+
 module.exports = {
-    signup, login
+    signup, login, acceptInvite, refreshToken, logout
 }
