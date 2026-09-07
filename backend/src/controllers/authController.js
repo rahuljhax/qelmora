@@ -52,7 +52,7 @@ const signup = async (req, res) => {
             success: true,
             message: 'User Registered Successfully!',
             accessToken,
-            user: {
+            data: {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
@@ -117,7 +117,9 @@ const login = async (req, res) => {
             data: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role,
+                organization: user.organization,
             }
         })
 
@@ -228,6 +230,29 @@ const logout = async (req, res) => {
     }
 }
 
+const getMe = async (req, res) => {
+    try {
+        const { user } = req;
+        res.status(200).json({
+            success: true,
+            message: 'User data fetched successfully!',
+            data: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                organization: user.organization
+            }
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: err.message
+        })
+    }
+}
+
 module.exports = {
-    signup, login, acceptInvite, refreshToken, logout
+    signup, login, acceptInvite, refreshToken, logout, getMe
 }
