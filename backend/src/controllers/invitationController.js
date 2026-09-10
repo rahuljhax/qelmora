@@ -35,36 +35,5 @@ const sendInvitation = async (req, res) => {
     }
 }
 
-const verifyInvitation = async (req, res) => {
-    try {
-        const { token } = req.query;
-        const existingInvitation = await Invitation.findOne({ token: token });
-        if (!existingInvitation || Date.now() > existingInvitation.expiresAt) {
-            if (existingInvitation) {
-                existingInvitation.status = 'expired';
-                await existingInvitation.save();
-            }
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid or expired token'
-            })
-        }
-        res.status(200).json({
-            success: true,
-            message: 'Token verified successfully',
-            data: {
-                email: existingInvitation.email,
-                role: existingInvitation.role,
-                organization: existingInvitation.organization,
-            }
-        })
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        })
-    }
-}
 
-
-module.exports = { sendInvitation, verifyInvitation };
+module.exports = { sendInvitation };

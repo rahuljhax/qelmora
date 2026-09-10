@@ -1,5 +1,5 @@
 import apiClient, { setAccessToken } from "@/lib/apiClient";
-import { AuthResponse } from "../types/auth.types";
+import { AcceptInviteInput, AuthResponse } from "../types/auth.types";
 import { loginSchemaType, SingupSchemaType } from "../schema/auth.schema";
 
 export const authService = {
@@ -16,6 +16,10 @@ export const authService = {
         if (response.data.accessToken) {
             setAccessToken(response.data.accessToken);
         }
+        return response.data;
+    },
+    async acceptInvitation(input: AcceptInviteInput) {
+        const response = await apiClient.post('/auth/accept-invite', input);
         return response.data;
     }
 } 
