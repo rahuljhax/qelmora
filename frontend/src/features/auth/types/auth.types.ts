@@ -10,7 +10,7 @@ export interface User {
 export interface AcceptInviteInput {
     name: string;
     password: string;
-    token: string;
+    token: string | null;
 }
 
 export interface AuthResponse {

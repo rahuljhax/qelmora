@@ -6,9 +6,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, loginSchemaType } from "../schema/auth.schema";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
     const { login } = useAuth();
+    const router = useRouter();
     const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<loginSchemaType>({
         resolver: zodResolver(loginSchema)
     })
@@ -19,6 +21,7 @@ export default function LoginForm() {
             if (response.success) {
                 login(response.data, response.accessToken);
                 toast.success(response.message);
+                router.push('/dashboard')
             }
         } catch (err: any) {
             toast.error(err.message);

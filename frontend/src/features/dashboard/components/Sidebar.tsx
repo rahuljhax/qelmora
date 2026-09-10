@@ -3,10 +3,12 @@ import React from 'react';
 import Link from 'next/link';
 import { NavItem } from '../types/type';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FolderKanban, Users, AlertCircle, Settings } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Users, AlertCircle, Settings, Divide, LogOut } from 'lucide-react';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 export default function Sidebar() {
     const pathName = usePathname();
+    const { user, isLoading, isAuthenticated, logout } = useAuth();
     const navItems: NavItem[] = [
         {
             name: "Dashboard",
@@ -64,23 +66,35 @@ export default function Sidebar() {
                             </Link>
                         );
                     })}
+                    <button
+                        onClick={logout}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-950/30 border border-transparent hover:border-red-900/50 transition-colors cursor-pointer text-left mt-2"
+                    >
+                        <LogOut className="w-5 h-5 text-red-400" />
+                        <span>Logout</span>
+                    </button>
                 </nav>
             </div>
 
             {/* Footer Profile / Workspace info */}
-            <div className="p-3 border-t border-slate-800">
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer">
-                    <img
-                        src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
-                        alt="user avatar"
-                        className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 object-cover"
-                    />
-                    <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-sm font-medium text-slate-200 truncate">Rahul Jha</span>
-                        <span className="text-xs text-slate-400 truncate">rahul@qelmora.com</span>
+            {isLoading
+                ? <></>
+                : isAuthenticated
+                    ? < div className="p-3 border-t border-slate-800">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer">
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
+                                alt="user avatar"
+                                className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 object-cover"
+                            />
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <span className="text-sm font-medium text-slate-200 truncate">{user?.name}</span>
+                                <span className="text-xs text-slate-400 truncate">{user?.email}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </aside>
+                    : <></>
+            }
+        </aside >
     );
 }

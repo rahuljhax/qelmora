@@ -20,5 +20,17 @@ export const loginSchema = z.object({
     password: z.string().min(2, 'Password must be at least 8 characters')
 })
 
+export const acceptInvitationSchema = z.object({
+    name: z.string(),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(8, 'Password must be at least 8 characters')
+}).refine(
+    (data) => data.password === data.confirmPassword,
+    {
+        message: 'Password do not match',
+        path: ['confirmPassword']
+    }
+)
+export type acceptInvitationSchemaType = z.infer<typeof acceptInvitationSchema>;
 export type SingupSchemaType = z.infer<typeof signupSchema>;
 export type loginSchemaType = z.infer<typeof loginSchema>;
