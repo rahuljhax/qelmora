@@ -20,6 +20,7 @@ const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const invitationRoutes = require('./routes/invitationRoutes');
+const memberRoutes = require('./routes/memberRoutes');
 
 
 // Route Mount (Endpoint : /api/auth)
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/invitations', invitationRoutes);
+app.use('/api/members', memberRoutes)
 
 
 module.exports = app;

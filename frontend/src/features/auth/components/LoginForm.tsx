@@ -7,26 +7,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, loginSchemaType } from "../schema/auth.schema";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 
 export default function LoginForm() {
     const { login } = useAuth();
     const router = useRouter();
     const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<loginSchemaType>({
-        resolver: zodResolver(loginSchema)
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: 'rahuljha.189244@gmail.com',
+            password: '12345678'
+        }
     })
 
-    const handleLogin = async (data: loginSchemaType) => {
-        try {
-            const response = await authService.login(data);
-            if (response.success) {
-                login(response.data, response.accessToken);
-                toast.success(response.message);
-                router.push('/dashboard')
-            }
-        } catch (err: any) {
-            toast.error(err.message);
+    const { mutate, isPending } = useMutation({
+        mutationFn: authService.login,
+        onSuccess: (response) => {
+            login(response.data, response.accessToken);
+            toast.success(response.message);
+            router.replace('/dashboard')
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || err?.message || 'Something went wrong');
         }
-    }
+    })
     return (
         <div className="w-full max-w-md bg-slate-950 border border-slate-800 rounded-xl p-8 shadow-sm">
             <div className="text-center mb-8">
@@ -34,7 +38,7 @@ export default function LoginForm() {
                 <p className="text-sm text-slate-400 mt-2">Enter your credentials to access your account</p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit(handleLogin)}>
+            <form className="space-y-5" onSubmit={handleSubmit((data) => mutate(data))}>
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email" className="text-sm font-medium text-slate-200">
                         Email Address

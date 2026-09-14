@@ -19,7 +19,6 @@ const sendInvitation = async (req, res) => {
             status: 'pending',
             token,
             expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000
-
         });
         res.status(201).json({
             success: true,
@@ -30,7 +29,8 @@ const sendInvitation = async (req, res) => {
     } catch (err) {
         res.status(500).json({
             success: false,
-            message: 'Internal Server Error'
+            message: 'Internal Server Error',
+            error: err.message
         })
     }
 }

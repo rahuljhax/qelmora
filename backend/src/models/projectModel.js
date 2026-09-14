@@ -8,6 +8,10 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Project description is required']
     },
+    assignee: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

@@ -1,24 +1,25 @@
 import Link from "next/link";
 import { Edit3, Eye, UserX } from "lucide-react";
+import { User } from "@/shared/types/shared.type";
 
-export default function MemberRow() {
+export default function MemberRow({ member }: { member: User }) {
     return (
         <tr className="hover:bg-slate-800/40 transition-colors">
             <td className="px-5 py-4 font-semibold text-slate-100 whitespace-nowrap">
-                Rahul Jha
+                {member.name}
             </td>
             <td className="px-5 py-4 text-slate-400 whitespace-nowrap">
-                rahuljha.189244@gmail.com
+                {member.email}
             </td>
             <td className="px-5 py-4 whitespace-nowrap">
                 <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700/60 rounded-md">
-                    Admin
+                    {member.role}
                 </span>
             </td>
             <td className="px-5 py-4 whitespace-nowrap text-right">
                 <div className="flex items-center justify-end gap-2">
                     <Link
-                        href={'/dashboard/members/edit/123'}
+                        href={`/dashboard/members/edit/${member.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-slate-100 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 rounded-lg transition-colors"
                     >
                         <Edit3 className="w-3.5 h-3.5" />

@@ -13,8 +13,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }, [isLoading, isAuthenticated, router])
 
     if (isLoading) {
-        return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 font-medium">
-            Verifying authentication...
+        return <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-800 border-t-slate-200"></div>
         </div>
     }
     if (!isAuthenticated) {
