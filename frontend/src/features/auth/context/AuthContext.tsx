@@ -1,8 +1,8 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from "react";
-import { User } from "../types/auth.types";
 import apiClient, { setAccessToken } from "@/lib/apiClient";
 import toast from "react-hot-toast";
+import { User } from "@/shared/types/shared.type";
 
 interface AuthContextType {
     user: User | null;
@@ -15,6 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsloading] = useState<boolean>(true);
 

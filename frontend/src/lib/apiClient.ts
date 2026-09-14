@@ -40,6 +40,7 @@ apiClient.interceptors.response.use(
             originalRequest.url?.includes('/auth/signup') ||
             originalRequest.url?.includes('/auth/logout');
 
+
         if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthRequest) {
 
             originalRequest._retry = true;

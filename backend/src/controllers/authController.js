@@ -193,7 +193,8 @@ const refreshToken = async (req, res) => {
         const user = await User.findById(userId);
 
         if (!user || refreshToken !== user.refreshToken) {
-            return res.status(403).json({
+            res.clearCookie('refreshToken');
+            return res.status(401).json({
                 success: false,
                 message: 'Invalid or revoked refresh token'
             })

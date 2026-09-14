@@ -6,13 +6,14 @@ import { authService } from "../services/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 
 export default function AcceptInviteForm() {
     const params = useSearchParams();
     const router = useRouter();
     const token = params.get('token');
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: zodResolver(acceptInvitationSchema)
     });
 
@@ -22,22 +23,23 @@ export default function AcceptInviteForm() {
         }
     }, [token])
 
-    const handleFormSubmit = async (data: acceptInvitationSchemaType) => {
-        try {
+    const { mutate, isPending } = useMutation({
+        mutationFn: (data: acceptInvitationSchemaType) => {
             const payload = {
                 name: data.name,
                 password: data.password,
                 token
             }
-            const response = await authService.acceptInvitation(payload);
-            if (response.success) {
-                toast.success(response.message || 'User onboard successfully');
-                router.replace('/login');
-            }
-        } catch (err: any) {
-            toast.error(err.response.message || err.message || 'Something went wrong ! Please try after sometime')
+            return authService.acceptInvitation(payload);
+        },
+        onSuccess: (response) => {
+            toast.success(response.message || 'User onboard successfully');
+            router.replace('/login');
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || err?.message || 'Something went wrong');
         }
-    }
+    })
     return (
         <div className="w-full max-w-md bg-slate-950 border border-slate-800 rounded-xl p-8 shadow-sm">
             <div className="text-center mb-8">
@@ -45,7 +47,7 @@ export default function AcceptInviteForm() {
                 <p className="text-sm text-slate-400 mt-2">Set up your profile and password to get started</p>
             </div>
 
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit((data) => mutate(data))} className="space-y-5">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name" className="text-sm font-medium text-slate-200">
                         Full Name
@@ -90,10 +92,10 @@ export default function AcceptInviteForm() {
 
                 <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isPending}
                     className="w-full py-2.5 px-4 bg-slate-100 text-slate-950 hover:bg-slate-200 rounded-lg text-sm font-semibold transition-colors border border-slate-100 mt-2 cursor-pointer"
                 >
-                    {isSubmitting ? 'Wait...' : 'Set Password & Accept Invite'}
+                    {isPending ? 'Wait...' : 'Set Password & Accept Invite'}
                 </button>
             </form>
         </div>

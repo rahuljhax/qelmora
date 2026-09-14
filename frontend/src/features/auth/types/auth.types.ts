@@ -1,12 +1,5 @@
-export type UserRole = 'admin' | 'manager' | 'member';
+import { User } from "@/shared/types/shared.type";
 
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    role: UserRole;
-    organization: string
-}
 export interface AcceptInviteInput {
     name: string;
     password: string;
